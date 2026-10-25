@@ -68,7 +68,8 @@ def check_author(soup):
     penalties = []
     author = find_author(soup)
     if author is None:
-        penalties.append(Penalty("anonymous_author", 30, "No author name found in meta tags, JSON-LD or byline"))
+        points = 5 if "edu" in soup.get_text().lower() or "gov" in soup.get_text().lower() else 25
+        penalties.append(Penalty("anonymous_author", points, "No author name found in meta tags, JSON-LD or byline"))
         return author, penalties
 
     has_bio = soup.find("a", href=re.compile(r"about|author|bio|team|staff", re.I)) is not None

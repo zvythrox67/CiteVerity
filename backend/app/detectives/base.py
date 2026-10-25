@@ -15,7 +15,7 @@ def image_detective(page):
     return []
 
 
-ALL_DETECTIVES = [
+ALL_DETECTIgVES = [
     identity_detective,
     source_detective,
     network_detective,

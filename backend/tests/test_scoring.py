@@ -1,39 +1,55 @@
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+import pytest
 
-from app.scoring import calculate_score, make_penalty, get_tier
-
-
-def test_clean_page():
-    result = calculate_score([])
-    assert result["score"] == 100
-    assert result["color"] == "green"
+from app.scoring import PointEngine, Penalty, tier_for
 
 
-def test_one_penalty():
-    result = calculate_score([make_penalty("anonymous_author", 15, "no author")])
-    assert result["score"] == 85
+def run(*penalties):
+    engine = PointEngine()
+    engine.extend(list(penalties))
+    return engine.compute()
 
 
-def test_rule_cap():
-    penalties = [make_penalty("anonymous_author", 1, "check") for i in range(20)]
-    assert calculate_score(penalties)["total_penalties"] == 15
+def test_clean_page_scores_100():
+    report = PointEngine().compute()
+    assert report.score == 100
+    assert report.color == "green"
 
 
-def test_never_below_zero():
-    penalties = [
-        make_penalty("no_outbound_evidence", 30, "x"),
-        make_penalty("fake_citations", 30, "x"),
-        make_penalty("circular_loop", 25, "x"),
-        make_penalty("suspicious_domain", 20, "x"),
-        make_penalty("bad_image", 20, "x"),
-        make_penalty("anonymous_author", 15, "x"),
-    ]
-    assert calculate_score(penalties)["score"] == 0
+def test_simple_deduction():
+    report = run(Penalty("anonymous_author", 15, "No byline"))
+    assert report.score == 85
+    assert report.tier == "High Trust"
 
 
-def test_tiers():
-    assert get_tier(85)[1] == "green"
-    assert get_tier(84)[1] == "yellow"
-    assert get_tier(50)[1] == "yellow"
-    assert get_tier(49)[1] == "red"
+def test_rule_cap_applies():
+    report = run(*[Penalty("anonymous_author", 1, "check " + str(i)) for i in range(20)])
+    assert report.total_penalties == 15
+    assert report.score == 85
+
+
+def test_score_never_negative():
+    report = run(
+        Penalty("no_outbound_evidence", 30, "x"), Penalty("fake_citations", 30, "x"),
+        Penalty("circular_loop", 25, "x"), Penalty("suspicious_domain", 20, "x"),
+        Penalty("decontext_image", 20, "x"), Penalty("anonymous_author", 15, "x"),
+    )
+    assert report.score == 0
+    assert report.color == "red"
+
+
+@pytest.mark.parametrize("score,color", [(100, "green"), (85, "green"), (84, "yellow"),
+                                         (50, "yellow"), (49, "red"), (0, "red")])
+def test_tier_boundaries(score, color):
+    assert tier_for(score)[1] == color
+
+
+def test_unknown_rule_is_rejected():
+    with pytest.raises(ValueError):
+        Penalty("made_up_rule", 5, "x")
+
+
+def test_report_dict_has_what_the_frontend_needs():
+    data = run(Penalty("suspicious_domain", 10, "bad ending")).to_dict()
+    assert data["penalties"][0]["category"].startswith("A:")
+    assert data["penalties"][0]["rule"] == "Suspicious domain"
+    assert data["total_penalties"] == 10

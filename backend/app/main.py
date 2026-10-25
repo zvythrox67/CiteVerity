@@ -1,22 +1,27 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from app.scoring import calculate_score
-from app.detectives import ALL_DETECTIVES
+from .fetcher import fetch_page
+from .pipeline import analyze_page
+from .chatbot import answer_question
 
-app = FastAPI(title="CiteVerity")
+app = FastAPI(title="CiteVerity API", version="0.5.0")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 
-class UrlRequest(BaseModel):
+class AnalyzeRequest(BaseModel):
     url: str
+
+
+class ChatRequest(BaseModel):
+    url: str
+    question: str
+    history: list = []
+
+
+PAGE_CACHE = {}
 
 
 @app.get("/health")
@@ -25,13 +30,29 @@ def health():
 
 
 @app.post("/analyze")
-def analyze(req: UrlRequest):
-    page = {"url": req.url, "html": "", "text": ""}
+def analyze(req: AnalyzeRequest):
+    try:
+        page = fetch_page(req.url)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Couldn't load that page: " + str(e))
 
-    penalties = []
-    for detective in ALL_DETECTIVES:
-        penalties += detective(page)
+    result = analyze_page(page)
 
-    result = calculate_score(penalties)
-    result["url"] = req.url
+    PAGE_CACHE[page.url] = {"text": page.text, "report": result}
+    PAGE_CACHE[req.url] = PAGE_CACHE[page.url]
     return result
+
+
+@app.post("/chat")
+def chat(req: ChatRequest):
+    cached = PAGE_CACHE.get(req.url)
+    if cached is None:
+        try:
+            page = fetch_page(req.url)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail="Couldn't load that page: " + str(e))
+        cached = {"text": page.text, "report": None}
+        PAGE_CACHE[req.url] = cached
+
+    answer = answer_question(cached["text"], req.question, req.history, cached["report"])
+    return {"answer": answer}

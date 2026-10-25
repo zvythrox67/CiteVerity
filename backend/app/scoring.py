@@ -1,60 +1,99 @@
+# scoring.py - the point engine for CiteVerity
+from dataclasses import dataclass
+
+MAX_SCORE = 100
 
 RULES = {
-    "anonymous_author":     {"category": "A: Identity", "max": 15},
-    "suspicious_domain":    {"category": "A: Identity", "max": 20},
-    "old_story":            {"category": "A: Identity", "max": 15},
-    "no_outbound_evidence": {"category": "B: Evidence", "max": 30},
-    "dead_end_trail":       {"category": "B: Evidence", "max": 15},
-    "non_falsifiable":      {"category": "B: Evidence", "max": 10},
-    "circular_loop":        {"category": "C: Network",  "max": 25},
-    "fake_citations":       {"category": "C: Network",  "max": 30},
-    "emotional_urgency":    {"category": "D: Emotional", "max": 15},
-    "bad_image":            {"category": "D: Emotional", "max": 20},
+    "anonymous_author":     {"category": "A: Identity & Transparency",      "max": 15, "label": "Anonymous author"},
+    "suspicious_domain":    {"category": "A: Identity & Transparency",      "max": 20, "label": "Suspicious domain"},
+    "old_story_repackaged": {"category": "A: Identity & Transparency",      "max": 15, "label": "Old story re-packaging"},
+    "no_outbound_evidence": {"category": "B: Evidence & Logic",             "max": 30, "label": "No outbound evidence"},
+    "dead_end_trail":       {"category": "B: Evidence & Logic",             "max": 15, "label": "Dead-end evidence trail"},
+    "non_falsifiable":      {"category": "B: Evidence & Logic",             "max": 10, "label": "Non-falsifiable rhetoric"},
+    "circular_loop":        {"category": "C: Network Manipulation",         "max": 25, "label": "Circular reporting loop"},
+    "fake_citations":       {"category": "C: Network Manipulation",         "max": 30, "label": "Unverifiable / fake citations"},
+    "emotional_urgency":    {"category": "D: Emotional & Visual Red Flags", "max": 15, "label": "High emotional urgency"},
+    "decontext_image":      {"category": "D: Emotional & Visual Red Flags", "max": 20, "label": "Decontextualized image"},
 }
 
-
-def make_penalty(rule, points, reason):
-    if rule not in RULES:
-        raise ValueError("unknown rule: " + rule)
-    return {"rule": rule, "points": points, "reason": reason}
-
-
-def get_tier(score):
-    if score >= 85:
-        return "High Trust", "green"
-    elif score >= 50:
-        return "Caution / Sketchy", "yellow"
-    else:
-        return "Untrustworthy", "red"
+TIERS = [
+    (85, "High Trust", "green"),
+    (50, "Caution / Sketchy", "yellow"),
+    (0, "Untrustworthy", "red"),
+]
 
 
-def calculate_score(penalties):
-    used = {}
-    details = []
+@dataclass
+class Penalty:
+    rule_id: str
+    points: int
+    reason: str
 
-    for p in penalties:
-        rule = p["rule"]
-        already = used.get(rule, 0)
-        room_left = RULES[rule]["max"] - already
-        taken = min(p["points"], room_left)
-        if taken <= 0:
-            continue
-        used[rule] = already + taken
-        details.append({
-            "rule": rule,
-            "category": RULES[rule]["category"],
-            "points": taken,
-            "reason": p["reason"],
-        })
+    def __post_init__(self):
+        if self.rule_id not in RULES:
+            raise ValueError("Unknown rule_id: " + self.rule_id)
+        if self.points < 0:
+            raise ValueError("Penalty points must be 0 or more")
 
-    total = sum(used.values())
-    score = max(0, 100 - total)
-    tier, color = get_tier(score)
 
-    return {
-        "score": score,
-        "tier": tier,
-        "color": color,
-        "total_penalties": total,
-        "details": details,
-    }
+class ScoreReport:
+    def __init__(self, score, tier, color, total_penalties, penalties, rule_totals):
+        self.score = score
+        self.tier = tier
+        self.color = color
+        self.total_penalties = total_penalties
+        self.penalties = penalties
+        self.rule_totals = rule_totals
+
+    def to_dict(self):
+        return {
+            "score": self.score,
+            "tier": self.tier,
+            "color": self.color,
+            "total_penalties": self.total_penalties,
+            "penalties": self.penalties,
+            "rule_totals": self.rule_totals,
+        }
+
+
+def tier_for(score):
+    for minimum, name, color in TIERS:
+        if score >= minimum:
+            return name, color
+    return TIERS[-1][1], TIERS[-1][2]
+
+
+class PointEngine:
+    def __init__(self):
+        self._penalties = []
+
+    def add(self, penalty):
+        self._penalties.append(penalty)
+
+    def extend(self, penalties):
+        for p in penalties:
+            self.add(p)
+
+    def compute(self):
+        used = {}
+        applied = []
+
+        for p in self._penalties:
+            rule = RULES[p.rule_id]
+            room_left = rule["max"] - used.get(p.rule_id, 0)
+            charged = min(p.points, max(0, room_left))
+            if charged == 0:
+                continue
+            used[p.rule_id] = used.get(p.rule_id, 0) + charged
+            applied.append({
+                "rule_id": p.rule_id,
+                "rule": rule["label"],
+                "category": rule["category"],
+                "points": charged,
+                "reason": p.reason,
+            })
+
+        total = sum(used.values())
+        score = max(0, MAX_SCORE - total)
+        tier, color = tier_for(score)
+        return ScoreReport(score, tier, color, total, applied, used)

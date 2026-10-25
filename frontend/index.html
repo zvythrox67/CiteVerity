@@ -1,15 +1,89 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>CiteVerity</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CiteVerity - Is this source legit?</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/extras.css">
 </head>
 <body>
-  <h1>CiteVerity</h1>
-  <p>dashboard</p>
-  <button id="test-btn">test backend</button>
-  <pre id="output"></pre>
-  <script src="app.js"></script>
+
+  <header class="site-header">
+    <h1>Cite<span>Verity</span></h1>
+    <p>Paste a link. Get a trust score and see exactly why.</p>
+  </header>
+
+  <section class="terminal">
+    <form id="analyze-form" autocomplete="off">
+      <input id="url-input" type="text" placeholder="https://example.com/article" aria-label="Page URL">
+      <button id="analyze-btn" type="submit">
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="btn-label">Analyze Source</span>
+      </button>
+    </form>
+    <div class="samples">
+      <span>No backend? Try a sample:</span>
+      <button class="sample-btn" data-sample="green">Trusted paper</button>
+      <button class="sample-btn" data-sample="yellow">Sketchy news</button>
+      <button class="sample-btn" data-sample="red">Clickbait blog</button>
+    </div>
+    <p id="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <main id="results" hidden>
+    <div class="layout">
+
+      <div class="main-col">
+        <section class="card verdict">
+          <div id="wheel"></div>
+          <div id="summary"></div>
+        </section>
+
+        <section class="card">
+          <h2>Truth Breakdown</h2>
+          <p class="hint">Every point we took off, and why.</p>
+          <div id="breakdown"></div>
+        </section>
+
+        <section class="card">
+          <h2>Source Map</h2>
+          <p class="hint">Who links to who. Flashing red arrows = sites quoting each other in a circle.</p>
+          <div id="graph-box"></div>
+        </section>
+
+        <section class="card">
+          <h2>Other side of the story</h2>
+          <div id="opposing"></div>
+        </section>
+      </div>
+
+      <aside class="side-col">
+        <section class="card">
+          <h2>Cite this page</h2>
+          <div id="cite-box"></div>
+        </section>
+
+        <section class="card">
+          <h2>Ask about this page</h2>
+          <p class="hint">The assistant only reads this page, so it won't make stuff up.</p>
+          <button id="open-chat-btn" class="secondary-btn">Open chat</button>
+        </section>
+      </aside>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">CiteVerity is a guide, not a judge. Always check important claims yourself.</footer>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="js/citations.js"></script>
+  <script src="js/citation-ui.js"></script>
+  <script src="js/graph.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/wheel.js"></script>
+  <script src="js/breakdown.js"></script>
+  <script src="js/sample.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

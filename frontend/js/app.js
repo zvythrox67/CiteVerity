@@ -1,5 +1,4 @@
-
-const API = "https://citeverity-backend.onrender.com";
+const API = "https://citeverity.onrender.com";
 let currentUrl = "";
 
 const LOADING_MESSAGES = [

@@ -51,6 +51,7 @@ The user is presented with a clean, dark-mode dashboard:
 
 *   **The AI Chatbot:** An integrated assistant that uses RAG (Retrieval-Augmented Generation) to read the page text. It allows users to ask questions about the article and will only answer based on the page's actual text to prevent hallucinations.
   <img width="245" height="137" alt="image" src="https://github.com/user-attachments/assets/6c20e5a6-615a-421a-8040-148afdbd7808" />
+  
   <img width="254" height="320" alt="image" src="https://github.com/user-attachments/assets/46685fd2-0303-4b4d-aacb-0ed8374ca628" />
 
 

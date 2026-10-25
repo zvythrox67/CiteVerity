@@ -1,10 +1,11 @@
 import os
 import re
-
 import httpx
 
-OLLAMA_URL = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-MODEL = os.getenv("OLLAMA_MODEL", "llama3")
+OLLAMA_URL = "https://ollama.com" 
+API_KEY = os.getenv("OLLAMA_API_KEY")
+MODEL = "gemma4:31b"
+
 MAX_HISTORY = 6 
 
 STOPWORDS = set("""a an the and or but if of to in on at for with about is are was were be been
@@ -12,11 +13,9 @@ it this that these those what who why how when where which does do did can could
 as by from not no yes you your i me my we our they them their he she his her its so than then
 there here have has had will just tell say says said article page""".split())
 
-
 def tokenize(text):
     return [w for w in re.findall(r"[a-z0-9]+", text.lower())
             if w not in STOPWORDS and len(w) > 1]
-
 
 def split_into_chunks(text, size=150, overlap=30):
     words = text.split()
@@ -28,7 +27,6 @@ def split_into_chunks(text, size=150, overlap=30):
         if start + size >= len(words):
             break
     return chunks
-
 
 def pick_chunks(text, question, k=4):
     chunks = split_into_chunks(text)
@@ -51,7 +49,6 @@ def pick_chunks(text, question, k=4):
     best.sort(key=lambda x: x[1])
     return [c for _, _, c in best]
 
-
 def report_to_text(report):
     if not report:
         return ""
@@ -59,7 +56,6 @@ def report_to_text(report):
     for p in report.get("penalties", []):
         lines.append("- lost " + str(p.get("points")) + " points: " + str(p.get("reason")))
     return "\n".join(lines)
-
 
 def build_messages(excerpts, question, history=None, report_text=""):
     system = (
@@ -82,25 +78,32 @@ def build_messages(excerpts, question, history=None, report_text=""):
     messages.append({"role": "user", "content": question})
     return messages
 
-
 def ask_ollama(messages):
     try:
+        headers = {
+            "Authorization": f"Bearer {API_KEY}",
+            "Content-Type": "application/json"
+        }
+        
+        # Sending the request to the Ollama Cloud API
         r = httpx.post(OLLAMA_URL + "/api/chat",
+                       headers=headers,
                        json={"model": MODEL, "messages": messages, "stream": False},
                        timeout=120)
-    except Exception:
-        return ("I can't reach Ollama. Make sure it's running (`ollama serve`) "
-                "and you've pulled a model (`ollama pull " + MODEL + "`).")
+    except Exception as e:
+        return f"I can't reach the AI service right now. (Error: {str(e)})"
 
+    if r.status_code == 401:
+        return "Invalid API Key. Please check your Ollama key."
     if r.status_code == 404:
-        return "Ollama doesn't have the model '" + MODEL + "'. Run `ollama pull " + MODEL + "` first."
+        return "The AI model could not be found on the server. Check the model name."
     if r.status_code != 200:
-        return "Ollama returned an error (status " + str(r.status_code) + ")."
+        return f"The AI service returned an error (Status {r.status_code})."
+    
     try:
         return r.json()["message"]["content"].strip()
     except Exception:
-        return "Ollama sent back something weird, try again."
-
+        return "The AI sent back an unexpected response format."
 
 def answer_question(page_text, question, history=None, report=None):
     excerpts = pick_chunks(page_text, question)

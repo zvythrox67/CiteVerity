@@ -1,6 +1,5 @@
-// connects the input box, the backend, and the display pieces
 
-const API = "http://127.0.0.1:8000";
+const API = "https://citeverity-backend.onrender.com";
 let currentUrl = "";
 
 const LOADING_MESSAGES = [
@@ -18,6 +17,7 @@ const button = document.getElementById("analyze-btn");
 const label = button.querySelector(".btn-label");
 const statusEl = document.getElementById("status");
 const results = document.getElementById("results");
+const timeout = setTimeout(() => controller.abort(), 60000);
 
 createChatWidget({ apiBase: API, getUrl: () => currentUrl });
 

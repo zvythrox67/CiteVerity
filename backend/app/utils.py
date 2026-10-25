@@ -41,7 +41,7 @@ def safe_get(url, timeout=8, **kwargs):
 
 
 def get_soup(html):
-    return BeautifulSoup(html, "lxml")
+    return BeautifulSoup(html, "html.parser")
 
 
 def html_to_text(html):

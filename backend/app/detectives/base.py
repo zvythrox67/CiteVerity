@@ -1,24 +1,16 @@
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
 
-def identity_detective(page):
-    return []
+@dataclass
+class PageData:
+    url: str
+    html: str = ""
+    text: str = ""
+    extra: dict = field(default_factory=dict)
 
-def source_detective(page):
-    return []
+class Detective(ABC):
+    name = "unnamed"
 
-def network_detective(page):
-    return []
-
-def mindgames_detective(page):
-    return []
-
-def image_detective(page):
-    return []
-
-
-ALL_DETECTIgVES = [
-    identity_detective,
-    source_detective,
-    network_detective,
-    mindgames_detective,
-    image_detective,
-]
+    @abstractmethod
+    def investigate(self, page):
+        ...

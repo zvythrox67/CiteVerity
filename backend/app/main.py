@@ -8,8 +8,11 @@ from .chatbot import answer_question
 
 app = FastAPI(title="CiteVerity API", version="0.5.0")
 
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"], )
 
+@app.get("/")
+def read_root():
+    return {"message": "CiteVerity backend is running"}
 
 class AnalyzeRequest(BaseModel):
     url: str

@@ -53,10 +53,10 @@ def check_falsifiable(text):
     hard = count_hard_data(text)
 
     if hard == 0:
-        penalties.append(Penalty("non_falsifiable", 3, "Zero numbers, dates or statistics in the whole text"))
-        penalties.append(Penalty("non_falsifiable", 2, "No dates or timeframes given"))
+        penalties.append(Penalty("non_falsifiable", 2, "Zero numbers, dates or statistics in the whole text"))
+        penalties.append(Penalty("non_falsifiable", 1, "No dates or timeframes given"))
     elif hard < 3:
-        penalties.append(Penalty("non_falsifiable", 2, "Almost no numbers or dates (" + str(hard) + " found)"))
+        penalties.append(Penalty("non_falsifiable", 1, "Almost no numbers or dates (" + str(hard) + " found)"))
 
     for phrase in UNFALSIFIABLE_PHRASES:
         if phrase in lower:

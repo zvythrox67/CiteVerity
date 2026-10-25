@@ -56,4 +56,5 @@ The user is presented with a clean, dark-mode dashboard:
 
 
 *   **Citation Generator:** A built-in tool that formats the page's metadata into APA, MLA, and Chicago styles.
-  <img width="240" height="262" alt="image" src="https://github.com/user-attachments/assets/2e65900d-a60d-4900-b8de-5dae63effe88" />
+  <img width="229" height="59" alt="image" src="https://github.com/user-attachments/assets/6be5c12e-023c-4b89-a05f-f0d262473db9" />
+

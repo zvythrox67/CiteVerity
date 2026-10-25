@@ -17,7 +17,6 @@ const button = document.getElementById("analyze-btn");
 const label = button.querySelector(".btn-label");
 const statusEl = document.getElementById("status");
 const results = document.getElementById("results");
-const timeout = setTimeout(() => controller.abort(), 60000);
 
 createChatWidget({ apiBase: API, getUrl: () => currentUrl });
 

@@ -62,7 +62,7 @@ def check_falsifiable(text):
     hard = count_hard_data(text)
 
     if hard == 0:
-        penalties.append(Penalty("non_falsifiable", 6, "Zero numbers, dates or statistics in the whole text"))
+        penalties.append(Penalty("non_falsifiable", 4, "Zero numbers, dates or statistics in the whole text"))
         penalties.append(Penalty("non_falsifiable", 2, "No dates or timeframes given"))
     elif hard < 3:
         penalties.append(Penalty("non_falsifiable", 3, "Almost no numbers or dates (" + str(hard) + " found)"))
@@ -95,8 +95,7 @@ def check_links(page):
     if len(links) == 0:
         page.extra["source_label"] = "Secondary Source"
         if registered_domain(page.url) in ESTABLISHED_OUTLETS:
-            penalties.append(Penalty("no_outbound_evidence", 10,
-                             "No outbound links (reduced from 30 because this is an established outlet with editorial standards)"))
+            penalties.append(Penalty("no_outbound_evidence", 0, "Established outlet with editorial standards."))
         else:
             penalties.append(Penalty("no_outbound_evidence", 30, "Page has zero outbound links backing up its claims"))
         return penalties

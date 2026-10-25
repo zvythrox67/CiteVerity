@@ -4,8 +4,8 @@ from dataclasses import dataclass
 MAX_SCORE = 100
 
 RULES = {
-    "anonymous_author":     {"category": "A: Identity & Transparency",      "max": 15, "label": "Anonymous author"},
-    "suspicious_domain":    {"category": "A: Identity & Transparency",      "max": 20, "label": "Suspicious domain"},
+    "anonymous_author":     {"category": "A: Identity & Transparency",      "max": 25, "label": "Anonymous author"},
+    "suspicious_domain":    {"category": "A: Identity & Transparency",      "max": 30, "label": "Suspicious domain"},
     "old_story_repackaged": {"category": "A: Identity & Transparency",      "max": 15, "label": "Old story re-packaging"},
     "no_outbound_evidence": {"category": "B: Evidence & Logic",             "max": 30, "label": "No outbound evidence"},
     "dead_end_trail":       {"category": "B: Evidence & Logic",             "max": 15, "label": "Dead-end evidence trail"},

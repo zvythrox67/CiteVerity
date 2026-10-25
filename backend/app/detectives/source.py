@@ -7,22 +7,13 @@ from ..scoring import Penalty
 from ..utils import split_url, registered_domain, safe_get
 
 PRIMARY_SUFFIX_PARTS = {"gov", "edu", "mil", "int", "ac"}
-PRIMARY_DOMAINS = {"doi.org", "nih.gov", "arxiv.org", "who.int", "europa.eu", "un.org",
-                   "courtlistener.com", "nature.com", "science.org", "thelancet.com",
-                   "nejm.org", "bmj.com", "plos.org"}
-SOCIAL_DOMAINS = {"facebook.com", "twitter.com", "x.com", "instagram.com", "tiktok.com",
-                  "reddit.com", "youtube.com", "t.me", "medium.com", "substack.com",
-                  "blogspot.com", "wordpress.com"}
-AGGREGATORS = {"news.google.com", "flipboard.com", "msn.com", "yahoo.com", "newsbreak.com",
-               "google.com", "bing.com"}
+PRIMARY_DOMAINS = {"doi.org", "nih.gov", "arxiv.org", "who.int", "europa.eu", "un.org","courtlistener.com", "nature.com", "science.org", "thelancet.com", "nejm.org", "bmj.com", "plos.org"}
+SOCIAL_DOMAINS = {"facebook.com", "twitter.com", "x.com", "instagram.com", "tiktok.com", "reddit.com", "youtube.com", "t.me", "medium.com", "substack.com","blogspot.com", "wordpress.com"}
+AGGREGATORS = {"news.google.com", "flipboard.com", "msn.com", "yahoo.com", "newsbreak.com","google.com", "bing.com"}
 
-ESTABLISHED_OUTLETS = {"reuters.com", "apnews.com", "bbc.com", "bbc.co.uk", "npr.org", "nytimes.com",
-                       "washingtonpost.com", "theguardian.com", "wsj.com", "bloomberg.com",
-                       "economist.com", "aljazeera.com", "cnn.com", "usatoday.com", "nbcnews.com",
-                       "cbsnews.com"}
+ESTABLISHED_OUTLETS = {"reuters.com", "apnews.com", "bbc.com", "bbc.co.uk", "npr.org", "nytimes.com","washingtonpost.com", "theguardian.com", "wsj.com", "bloomberg.com","economist.com", "aljazeera.com", "cnn.com", "usatoday.com", "nbcnews.com","cbsnews.com"}
 
-VAGUE_PHRASES = ["experts say", "studies show", "scientists say", "research shows",
-                 "many people say", "sources say", "they say that"]
+VAGUE_PHRASES = ["experts say", "studies show", "scientists say", "research shows","many people say", "sources say", "they say that"]
 UNFALSIFIABLE_PHRASES = ["everyone knows", "it's obvious", "it is obvious", "wake up", "common sense"]
 
 

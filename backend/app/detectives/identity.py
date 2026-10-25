@@ -10,17 +10,13 @@ from ..scoring import Penalty
 from ..utils import (get_soup, get_json_ld, split_url, registered_domain,
                      safe_get, wayback_first_seen)
 
-BAD_SUFFIXES = {"xyz", "top", "click", "shop", "biz", "buzz", "icu", "loan",
-                "win", "bid", "tk", "ml", "ga", "cf", "gq", "work", "rest"}
+BAD_SUFFIXES = {"xyz", "top", "click", "shop", "biz", "buzz", "icu", "loan","win", "bid", "tk", "ml", "ga", "cf", "gq", "work", "rest"}
 
-KNOWN_OUTLETS = ["reuters", "bbc", "nytimes", "washingtonpost", "theguardian", "cnn",
-                 "apnews", "npr", "nature", "sciencemag", "nih", "who", "cdc", "wsj",
-                 "bloomberg", "forbes", "usatoday", "foxnews", "nbcnews", "cbsnews",
-                 "abcnews", "politico", "economist", "aljazeera"]
+KNOWN_OUTLETS = ["reuters", "bbc", "nytimes", "washingtonpost", "theguardian", "cnn", "apnews", "npr", "nature", "sciencemag", "nih", "who", "cdc", "wsj", "bloomberg", "forbes", "usatoday", "foxnews", "nbcnews", "cbsnews", "abcnews", "politico", "economist", "aljazeera"]
 
-FAKE_AUTHORS = {"admin", "administrator", "staff", "editor", "webmaster", "guest",
-                "user", "unknown", "anonymous", "news desk", "newsdesk", "team"}
+FAKE_AUTHORS = {"admin", "administrator", "staff", "editor", "webmaster", "guest", "user", "unknown", "anonymous", "news desk", "newsdesk", "team"}
 
+SOCIAL_FORUMS = {"reddit.com", "quora.com", "medium.com", "substack.com", "facebook.com", "twitter.com", "x.com", "tumblr.com", "pinterest.com", "tiktok.com"}
 
 def clean_author(name):
     if not name:
@@ -72,7 +68,7 @@ def check_author(soup):
     penalties = []
     author = find_author(soup)
     if author is None:
-        penalties.append(Penalty("anonymous_author", 25, "No author name found in meta tags, JSON-LD or byline"))
+        penalties.append(Penalty("anonymous_author", 30, "No author name found in meta tags, JSON-LD or byline"))
         return author, penalties
 
     has_bio = soup.find("a", href=re.compile(r"about|author|bio|team|staff", re.I)) is not None
@@ -89,6 +85,11 @@ def check_domain(url):
     parts = split_url(url)
     suffix = parts.suffix.split(".")[-1]
     label = parts.domain.lower()
+    reg_domain = parts.registered_domain.lower()
+
+    
+    if reg_domain in SOCIAL_FORUMS:
+        penalties.append(Penalty("suspicious_domain", 20, "Domain is a social media site or user-generated forum"))
 
     if suffix in BAD_SUFFIXES:
         penalties.append(Penalty("suspicious_domain", 10, "Domain ending '." + suffix + "' is heavily used by junk sites"))

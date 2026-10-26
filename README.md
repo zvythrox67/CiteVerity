@@ -1,6 +1,6 @@
 # CiteVerity
 
-CiteVerity is a web application designed to help users determine the legitimacy of online information. By pasting a URL into the dashboard, the app analyzes the page's code, text, and outbound network to determine if it is a credible source, or just misinformation.
+CiteVerity is a web application designed to help users determine the legitimacy of online information. By pasting a URL into the dashboard, the app analyzes the page's code, text, and outbound network to determine if it is a credible source, or misinformation.
 
 ## How the Scoring Works
 
